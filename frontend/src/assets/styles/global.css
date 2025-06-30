@@ -1,0 +1,88 @@
+body {
+  background: #f4f6fa;
+  font-family: 'Segoe UI', 'PingFang SC', 'Hiragino Sans', Arial, sans-serif;
+}
+
+.el-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.08);
+  background: #fff;
+}
+
+.el-table th,
+.el-table td {
+  padding: 14px 10px;
+}
+
+.el-table__row:hover {
+  background: #e8f5e9;
+}
+
+.el-button {
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.el-button--primary {
+  background: #67C23A;
+  border-color: #67C23A;
+}
+
+.el-button--primary:hover {
+  background: #4CAF50;
+  border-color: #4CAF50;
+}
+
+.el-tag {
+  border-radius: 8px;
+  font-size: 14px;
+  padding: 5px 14px;
+}
+
+.sidebar {
+  background: linear-gradient(180deg, #222 0%, #333 100%);
+  color: #fff;
+  min-height: 100vh;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);
+  padding-top: 32px;
+}
+
+.sidebar .active {
+  background: #67C23A;
+  color: #fff;
+  border-radius: 10px;
+}
+
+/* Dark Theme Styles */
+html.dark {
+  --el-bg-color: #141414;
+  --el-bg-color-overlay: #1d1d1d;
+  --el-color-primary: #67c23a;
+  --el-text-color-primary: #e0e0e0;
+  --el-text-color-regular: #cfcfcf;
+  --el-fill-color-light: #2a2a2a;
+  --el-border-color: #3a3a3a;
+  --el-border-color-light: #303030;
+  --el-border-color-lighter: #2a2a2a;
+
+  body {
+    background: #141414;
+    color: #cfcfcf;
+  }
+
+  .el-card,
+  .app-header {
+    background-color: #1d1d1d;
+    color: #cfcfcf;
+    border: 1px solid #3a3a3a;
+  }
+
+  .sidebar-container {
+    background-color: #1d1d1d !important;
+  }
+
+  .header-right .user-info .username {
+    color: #e0e0e0 !important;
+  }
+}

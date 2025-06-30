@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springboot.mapper.CommentMapper">
+    <insert id="insert" parameterType="com.example.springboot.entity.Comment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO comment (note_id, user_id, content, parent_id, create_time)
+        VALUES (#{noteId}, #{userId}, #{content}, #{parentId}, NOW())
+    </insert>
+
+    <select id="selectByNoteId" parameterType="int" resultType="com.example.springboot.entity.Comment">
+        SELECT c.*, u.username, u.avatar 
+        FROM comment c
+        LEFT JOIN user u ON c.user_id = u.id
+        WHERE c.note_id = #{noteId} 
+        ORDER BY create_time ASC
+    </select>
+
+    <select id="selectByNoteIdPaged" resultType="com.example.springboot.entity.Comment">
+        SELECT c.*, u.username, u.avatar
+        FROM comment c
+        LEFT JOIN user u ON c.user_id = u.id
+        WHERE c.note_id = #{noteId}
+        ORDER BY c.create_time ASC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <delete id="deleteById" parameterType="int">
+        DELETE FROM comment WHERE id = #{id}
+    </delete>
+
+    <select id="countByNoteId" parameterType="int" resultType="int">
+        SELECT count(*) FROM comment WHERE note_id = #{noteId}
+    </select>
+
+    <select id="selectById" parameterType="int" resultType="com.example.springboot.entity.Comment">
+        SELECT c.*, u.username, u.avatar
+        FROM comment c
+        LEFT JOIN user u ON c.user_id = u.id
+        WHERE c.id = #{id}
+    </select>
+</mapper> 

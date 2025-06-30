@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springboot.mapper.NoteMapper">
+    <resultMap id="BaseResultMap" type="com.example.springboot.entity.Note">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="username" property="username"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="is_public" property="isPublic"/>
+        <result column="share_code" property="shareCode"/>
+        <result column="view_count" property="viewCount"/>
+        <result column="like_count" property="likeCount"/>
+        <result column="comment_count" property="commentCount"/>
+        <result column="favorite_count" property="favoriteCount"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <resultMap id="NoteWithAuthorResultMap" type="com.example.springboot.entity.Note" extends="BaseResultMap">
+        <association property="author" javaType="com.example.springboot.entity.User">
+            <id property="id" column="author_id"/>
+            <result property="username" column="author_username"/>
+            <result property="email" column="author_email"/>
+            <result property="avatar" column="author_avatar"/>
+            <result property="signature" column="author_signature"/>
+        </association>
+    </resultMap>
+
+    <select id="findByUsername" resultMap="BaseResultMap">
+        SELECT id, user_id, username, title, content, is_public, share_code, view_count, like_count, comment_count, favorite_count, create_time, update_time FROM note
+        WHERE username = #{username}
+        <if test="keyword != null and keyword != ''">
+            AND (title LIKE CONCAT('%', #{keyword}, '%')
+            OR content LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY update_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByUsername" resultType="int">
+        SELECT COUNT(*) FROM note
+        WHERE username = #{username}
+        <if test="keyword != null and keyword != ''">
+            AND (title LIKE CONCAT('%', #{keyword}, '%')
+            OR content LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+    </select>
+
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT id, user_id, username, title, content, is_public, share_code, view_count, like_count, comment_count, favorite_count, create_time, update_time FROM note WHERE id = #{id} AND username = #{username}
+    </select>
+
+    <select id="findByShareCode" resultMap="NoteWithAuthorResultMap">
+        SELECT
+            n.id, n.user_id, n.username, n.title, n.content, n.is_public, n.share_code,
+            n.view_count, n.like_count, n.comment_count, n.favorite_count, n.create_time, n.update_time,
+            u.id as author_id, u.username as author_username, u.email as author_email,
+            u.avatar as author_avatar, u.signature as author_signature
+        FROM
+            note n
+        LEFT JOIN
+            user u ON n.user_id = u.id
+        WHERE
+            n.share_code = #{shareCode} AND n.is_public = 1
+    </select>
+
+    <select id="findPublicNotes" resultMap="BaseResultMap">
+        SELECT n.id, n.user_id, n.username, n.title, n.content, n.is_public, n.share_code, n.view_count, n.like_count,
+               COUNT(c.id) AS comment_count, n.favorite_count, n.create_time, n.update_time
+        FROM note n
+        LEFT JOIN comment c ON n.id = c.note_id
+        WHERE n.is_public = 1
+        <if test="keyword != null and keyword != ''">
+            AND (n.title LIKE CONCAT('%', #{keyword}, '%') OR n.content LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        GROUP BY n.id
+        ORDER BY n.view_count DESC, n.update_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countPublicNotes" resultType="int">
+        SELECT COUNT(*) FROM note WHERE is_public = 1
+        <if test="keyword != null and keyword != ''">
+            AND (title LIKE CONCAT('%', #{keyword}, '%') OR content LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+    </select>
+
+    <insert id="insert" parameterType="com.example.springboot.entity.Note" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO note (user_id, username, title, content, is_public, share_code, view_count, like_count, comment_count, favorite_count, create_time, update_time)
+        VALUES (#{userId}, #{username}, #{title}, #{content}, #{isPublic}, #{shareCode}, #{viewCount}, 0, 0, 0, NOW(), NOW())
+    </insert>
+
+    <update id="update" parameterType="com.example.springboot.entity.Note">
+        UPDATE note
+        SET title = #{title},
+            content = #{content},
+            is_public = #{isPublic},
+            share_code = #{shareCode},
+            view_count = #{viewCount},
+            like_count = #{likeCount},
+            comment_count = #{commentCount},
+            favorite_count = #{favoriteCount},
+            update_time = NOW()
+        WHERE id = #{id} AND username = #{username}
+    </update>
+
+    <update id="incrementViewCount">
+        UPDATE note SET view_count = view_count + 1 WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM note WHERE id = #{id} AND username = #{username}
+    </delete>
+
+    <!-- 笔记标签关联操作 -->
+    <insert id="insertNoteTag">
+        INSERT INTO note_tag (note_id, tag_id)
+        VALUES (#{noteId}, #{tagId})
+    </insert>
+
+    <delete id="deleteNoteTagsByNoteId">
+        DELETE FROM note_tag WHERE note_id = #{noteId}
+    </delete>
+
+    <select id="findTagIdsByNoteId" resultType="java.lang.Integer">
+        SELECT tag_id FROM note_tag WHERE note_id = #{noteId}
+    </select>
+
+    <update id="updatePublicStatus">
+        UPDATE note
+        SET is_public = #{isPublic},
+            share_code = #{shareCode},
+            update_time = NOW()
+        WHERE id = #{id} AND username = #{username}
+    </update>
+
+    <select id="findByTagId" resultMap="BaseResultMap">
+        SELECT n.* FROM note n
+        LEFT JOIN note_tag nt ON n.id = nt.note_id
+        WHERE nt.tag_id = #{tagId}
+        ORDER BY n.create_time DESC
+    </select>
+
+    <select id="findNotesByTagId" resultType="com.example.springboot.entity.Note">
+        SELECT n.*
+        FROM note n
+        JOIN note_tag nt ON n.id = nt.note_id
+        WHERE nt.tag_id = #{tagId} AND n.username = #{username}
+        ORDER BY n.create_time DESC
+    </select>
+</mapper> 

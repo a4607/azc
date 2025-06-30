@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springboot.mapper.TagMapper">
+    <resultMap id="BaseResultMap" type="com.example.springboot.entity.Tag">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="username" property="username"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="findByUsername" resultMap="BaseResultMap">
+        SELECT * FROM tag WHERE username = #{username}
+    </select>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT * FROM tag
+    </select>
+
+    <insert id="insert" parameterType="com.example.springboot.entity.Tag" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tag (name, username, create_time, update_time)
+        VALUES (#{name}, #{username}, NOW(), NOW())
+    </insert>
+
+    <update id="update" parameterType="com.example.springboot.entity.Tag">
+        UPDATE tag
+        SET name = #{name},
+            update_time = NOW()
+        WHERE id = #{id} AND username = #{username}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM tag WHERE id = #{id}
+    </delete>
+
+    <select id="countNotesByTagIdAndUsername" resultType="java.lang.Integer">
+        SELECT COUNT(n.id)
+        FROM note n
+        LEFT JOIN note_tag tn ON n.id = tn.note_id
+        WHERE tn.tag_id = #{tagId} AND n.username = #{username}
+    </select>
+
+    <select id="findByIds" resultMap="BaseResultMap">
+        SELECT * FROM tag WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+</mapper> 
